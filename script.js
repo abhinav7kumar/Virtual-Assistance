@@ -1,3 +1,11 @@
+
+const API_KEY = "AIzaSyDFHM6CM1TG1Ndgu2gtFNISL8l4WC1YIDA";
+const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`;
+
+
+
+
+
 let btn = document.querySelector("#btn");
 let content = document.querySelector("#content");
 let voice = document.querySelector("#voice");
@@ -65,6 +73,7 @@ if (speechRecognition) {
 
 // Process command based on recognized speech
 function takeCommand(message) {
+    console.log(message)
     voice.style.display = "none";
     btn.style.display = "flex";
     
@@ -97,8 +106,52 @@ function takeCommand(message) {
         let date = new Date().toLocaleString(undefined, { day: "numeric", month: "short" });
         speak(`Today's date is ${date}`);
     } else {
-        let finalText = "This is what I found on the internet regarding " + message.replace(/shipra|shifra/g, "");
-        speak(finalText);
-        window.open(`https://www.google.com/search?q=${message.replace(/shipra|shifra/g, "")}`, "_blank");
-    }
+
+( async()=>{
+    console.log(message + "  right----")
+                const res = await generateAPIRespone(message);
+                // console.log(res)
+                speak(res)
+    
+            })();
+       
+
+                
+        
 }
+
+    }
+
+    const generateAPIRespone = async (message) => {
+        console.log(message)
+   
+        const userMessage=message + " in 70 words only"
+        console.log(userMessage)
+   
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{
+                        role: "user",
+                        parts: [{ text: userMessage }]
+                    }]
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error.message);
+    
+            const apiResponse = data?.candidates[0].content.parts[0].text.replace(/\*(.*?)\*/g, '$1');
+            console.log(apiResponse)
+            // console.log(typeof(apiResponse))
+            return apiResponse
+    
+          
+        } catch (error) {
+            console.log(error ," server is not responding")
+          }
+    };
+
+
+  
